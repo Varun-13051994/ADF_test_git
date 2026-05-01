@@ -113,6 +113,10 @@
 			"Dummy": {
 				"type": "string",
 				"defaultValue": "Dummy"
+			},
+			"Dummy_varun1": {
+				"type": "string",
+				"defaultValue": "Dummy_varun2"
 			}
 		},
 		"annotations": [],
