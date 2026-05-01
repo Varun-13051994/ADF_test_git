@@ -1,0 +1,25 @@
+{
+	"name": "CDC_ADLS",
+	"properties": {
+		"linkedServiceName": {
+			"referenceName": "Varun_AzureDataLakeStorage",
+			"type": "LinkedServiceReference"
+		},
+		"annotations": [],
+		"type": "Parquet",
+		"typeProperties": {
+			"location": {
+				"type": "AzureBlobFSLocation",
+				"fileName": {
+					"value": "@concat(\r\n  'Parquet_CDC_',\r\n  formatDateTime(\r\n    convertFromUtc(utcNow(), 'India Standard Time'),\r\n    'yyyy_MMM_dd HH_mm_ss'\r\n  )\r\n)",
+					"type": "Expression"
+				},
+				"folderPath": "landing/CDC_SQL_Server",
+				"fileSystem": "dev-varun-azurecontainer"
+			},
+			"compressionCodec": "snappy"
+		},
+		"schema": []
+	},
+	"type": "Microsoft.DataFactory/factories/datasets"
+}

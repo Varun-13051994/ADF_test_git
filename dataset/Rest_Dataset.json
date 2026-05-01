@@ -1,0 +1,16 @@
+{
+	"name": "Rest_Dataset",
+	"properties": {
+		"linkedServiceName": {
+			"referenceName": "Test_Rest",
+			"type": "LinkedServiceReference"
+		},
+		"annotations": [],
+		"type": "RestResource",
+		"typeProperties": {
+			"relativeUrl": "/posts"
+		},
+		"schema": []
+	},
+	"type": "Microsoft.DataFactory/factories/datasets"
+}

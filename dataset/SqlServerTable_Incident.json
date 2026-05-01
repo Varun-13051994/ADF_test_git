@@ -1,0 +1,132 @@
+{
+	"name": "SqlServerTable_Incident",
+	"properties": {
+		"linkedServiceName": {
+			"referenceName": "LS_VarunLocalServer",
+			"type": "LinkedServiceReference"
+		},
+		"parameters": {
+			"Table_name_src": {
+				"type": "string"
+			}
+		},
+		"annotations": [],
+		"type": "SqlServerTable",
+		"schema": [
+			{
+				"name": "Number",
+				"type": "nvarchar"
+			},
+			{
+				"name": "Opened",
+				"type": "date"
+			},
+			{
+				"name": "Resolved",
+				"type": "date"
+			},
+			{
+				"name": "Short description",
+				"type": "nvarchar"
+			},
+			{
+				"name": "Caller",
+				"type": "nvarchar"
+			},
+			{
+				"name": "Priority",
+				"type": "nvarchar"
+			},
+			{
+				"name": "State",
+				"type": "nvarchar"
+			},
+			{
+				"name": "Category",
+				"type": "nvarchar"
+			},
+			{
+				"name": "Assignment group",
+				"type": "nvarchar"
+			},
+			{
+				"name": "Assigned to",
+				"type": "nvarchar"
+			},
+			{
+				"name": "Updated",
+				"type": "datetime",
+				"precision": 23,
+				"scale": 3
+			},
+			{
+				"name": "Updated by",
+				"type": "nvarchar"
+			},
+			{
+				"name": "Closed by",
+				"type": "nvarchar"
+			},
+			{
+				"name": "Reassignment count",
+				"type": "float",
+				"precision": 15
+			},
+			{
+				"name": "Parent Incident",
+				"type": "nvarchar"
+			},
+			{
+				"name": "Child Incidents",
+				"type": "float",
+				"precision": 15
+			},
+			{
+				"name": "Resolve time",
+				"type": "float",
+				"precision": 15
+			},
+			{
+				"name": "Resolved by",
+				"type": "nvarchar"
+			},
+			{
+				"name": "Reopen count",
+				"type": "float",
+				"precision": 15
+			},
+			{
+				"name": "Tags",
+				"type": "nvarchar"
+			},
+			{
+				"name": "Configuration item",
+				"type": "nvarchar"
+			},
+			{
+				"name": "Service",
+				"type": "nvarchar"
+			},
+			{
+				"name": "Work notes",
+				"type": "nvarchar"
+			},
+			{
+				"name": "Comments and Work notes",
+				"type": "nvarchar"
+			},
+			{
+				"name": "Resolution notes",
+				"type": "nvarchar"
+			}
+		],
+		"typeProperties": {
+			"schema": "dbo",
+			"table": {
+				"value": "@dataset().Table_name_src",
+				"type": "Expression"
+			}
+		}
+	},
+	"type": "Microsoft.DataFactory/factories/datasets"
+}

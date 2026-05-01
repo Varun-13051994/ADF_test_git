@@ -1,0 +1,15 @@
+{
+	"name": "VarunADF-testing",
+	"properties": {
+		"trustModeClaimForMi": {
+			"value": "Enabled",
+			"editable": true
+		}
+	},
+	"location": "eastus",
+	"identity": {
+		"type": "SystemAssigned",
+		"principalId": "13c49796-a272-4b8f-b5a3-b4b1d0c939aa",
+		"tenantId": "c2a1adc4-0f49-47cb-bed4-63f2c0126d1d"
+	}
+}
