@@ -1,0 +1,11 @@
+{
+	"name": "Varun_AzureDataLakeStorage",
+	"type": "Microsoft.DataFactory/factories/linkedservices",
+	"properties": {
+		"annotations": [],
+		"type": "AzureBlobFS",
+		"typeProperties": {
+			"url": "https://varunstorageaccountdb.dfs.core.windows.net/"
+		}
+	}
+}

@@ -1,0 +1,38 @@
+{
+	"name": "LocalToADLS",
+	"properties": {
+		"linkedServiceName": {
+			"referenceName": "Varun_AzureDataLakeStorage",
+			"type": "LinkedServiceReference"
+		},
+		"annotations": [],
+		"type": "Parquet",
+		"typeProperties": {
+			"location": {
+				"type": "AzureBlobFSLocation",
+				"fileName": {
+					"value": "@concat('Parquet_', formatDateTime(utcNow(), 'yyyy_MMM_dd HHmmss'), '.parquet')",
+					"type": "Expression"
+				},
+				"folderPath": "landing",
+				"fileSystem": "dev-varun-azurecontainer"
+			},
+			"compressionCodec": "snappy"
+		},
+		"schema": [
+			{
+				"name": "user_id",
+				"type": "INT64"
+			},
+			{
+				"name": "product",
+				"type": "UTF8"
+			},
+			{
+				"name": "amount",
+				"type": "INT64"
+			}
+		]
+	},
+	"type": "Microsoft.DataFactory/factories/datasets"
+}

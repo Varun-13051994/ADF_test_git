@@ -1,0 +1,7 @@
+{
+	"name": "VarunLocalSQLServer",
+	"properties": {
+		"type": "SelfHosted",
+		"description": "This is an IR to connect to my local server"
+	}
+}

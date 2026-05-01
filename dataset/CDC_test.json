@@ -1,0 +1,39 @@
+{
+	"name": "CDC_test",
+	"properties": {
+		"linkedServiceName": {
+			"referenceName": "LS_VarunLocalServer",
+			"type": "LinkedServiceReference"
+		},
+		"annotations": [],
+		"type": "SqlServerTable",
+		"schema": [
+			{
+				"name": "claim_id",
+				"type": "int",
+				"precision": 10
+			},
+			{
+				"name": "encounter_id",
+				"type": "int",
+				"precision": 10
+			},
+			{
+				"name": "claim_amount",
+				"type": "float",
+				"precision": 15
+			},
+			{
+				"name": "updated_time",
+				"type": "datetime",
+				"precision": 23,
+				"scale": 3
+			}
+		],
+		"typeProperties": {
+			"schema": "dbo",
+			"table": "med_data"
+		}
+	},
+	"type": "Microsoft.DataFactory/factories/datasets"
+}

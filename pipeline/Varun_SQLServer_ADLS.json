@@ -1,0 +1,153 @@
+{
+	"name": "Varun_SQLServer_ADLS",
+	"properties": {
+		"activities": [
+			{
+				"name": "CollectTables_and_Iterate",
+				"type": "ForEach",
+				"dependsOn": [
+					{
+						"activity": "DB_tables",
+						"dependencyConditions": [
+							"Succeeded"
+						]
+					}
+				],
+				"userProperties": [],
+				"typeProperties": {
+					"items": {
+						"value": "@split(variables('Tables'), ', ')",
+						"type": "Expression"
+					},
+					"batchCount": 4,
+					"activities": [
+						{
+							"name": "Copy data1",
+							"type": "Copy",
+							"dependsOn": [],
+							"policy": {
+								"timeout": "0.12:00:00",
+								"retry": 0,
+								"retryIntervalInSeconds": 30,
+								"secureOutput": false,
+								"secureInput": false
+							},
+							"userProperties": [],
+							"typeProperties": {
+								"source": {
+									"type": "SqlServerSource",
+									"queryTimeout": "02:00:00",
+									"partitionOption": "None"
+								},
+								"sink": {
+									"type": "ParquetSink",
+									"storeSettings": {
+										"type": "AzureBlobFSWriteSettings",
+										"maxConcurrentConnections": 4,
+										"copyBehavior": "FlattenHierarchy"
+									},
+									"formatSettings": {
+										"type": "ParquetWriteSettings"
+									}
+								},
+								"enableStaging": false,
+								"translator": {
+									"type": "TabularTranslator",
+									"typeConversion": true,
+									"typeConversionSettings": {
+										"allowDataTruncation": true,
+										"treatBooleanAsNumber": false
+									}
+								}
+							},
+							"inputs": [
+								{
+									"referenceName": "SqlServerTable_Incident",
+									"type": "DatasetReference",
+									"parameters": {
+										"Table_name_src": {
+											"value": "@item()",
+											"type": "Expression"
+										}
+									}
+								}
+							],
+							"outputs": [
+								{
+									"referenceName": "Incidents_Parquet",
+									"type": "DatasetReference",
+									"parameters": {
+										"FileName": {
+											"value": "@concat(item(), '.parquet')",
+											"type": "Expression"
+										}
+									}
+								}
+							]
+						},
+						{
+							"name": "upon_failure",
+							"type": "Fail",
+							"dependsOn": [
+								{
+									"activity": "Copy data1",
+									"dependencyConditions": [
+										"Failed"
+									]
+								}
+							],
+							"userProperties": [],
+							"typeProperties": {
+								"message": {
+									"value": "@activity('Copy data1').error.message",
+									"type": "Expression"
+								},
+								"errorCode": "500"
+							}
+						}
+					]
+				}
+			},
+			{
+				"name": "DB_tables",
+				"type": "SetVariable",
+				"dependsOn": [],
+				"policy": {
+					"secureOutput": false,
+					"secureInput": false
+				},
+				"userProperties": [],
+				"typeProperties": {
+					"variableName": "Tables",
+					"value": {
+						"value": "@concat(pipeline().parameters.Tb1, ', ',\n        pipeline().parameters.Tb2, ', ',\n        pipeline().parameters.Tb3\n        )",
+						"type": "Expression"
+					}
+				}
+			}
+		],
+		"concurrency": 4,
+		"parameters": {
+			"Tb1": {
+				"type": "String",
+				"defaultValue": "Incident"
+			},
+			"Tb2": {
+				"type": "String",
+				"defaultValue": "Contingency & Overhead cost"
+			},
+			"Tb3": {
+				"type": "String",
+				"defaultValue": "salary_details"
+			}
+		},
+		"variables": {
+			"Tables": {
+				"type": "String"
+			}
+		},
+		"annotations": [],
+		"lastPublishTime": "2026-04-27T09:31:12Z"
+	},
+	"type": "Microsoft.DataFactory/factories/pipelines"
+}

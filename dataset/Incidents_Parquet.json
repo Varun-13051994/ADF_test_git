@@ -1,0 +1,131 @@
+{
+	"name": "Incidents_Parquet",
+	"properties": {
+		"linkedServiceName": {
+			"referenceName": "Varun_AzureDataLakeStorage",
+			"type": "LinkedServiceReference"
+		},
+		"parameters": {
+			"FileName": {
+				"type": "string"
+			}
+		},
+		"annotations": [],
+		"type": "Parquet",
+		"typeProperties": {
+			"location": {
+				"type": "AzureBlobFSLocation",
+				"fileName": {
+					"value": "@dataset().FileName",
+					"type": "Expression"
+				},
+				"folderPath": "landing",
+				"fileSystem": "dev-varun-azurecontainer"
+			},
+			"compressionCodec": "snappy"
+		},
+		"schema": [
+			{
+				"name": "Number",
+				"type": "UTF8"
+			},
+			{
+				"name": "Opened",
+				"type": "DATE"
+			},
+			{
+				"name": "Resolved",
+				"type": "DATE"
+			},
+			{
+				"name": "Short_description",
+				"type": "UTF8"
+			},
+			{
+				"name": "Caller",
+				"type": "UTF8"
+			},
+			{
+				"name": "Priority",
+				"type": "UTF8"
+			},
+			{
+				"name": "State",
+				"type": "UTF8"
+			},
+			{
+				"name": "Category",
+				"type": "UTF8"
+			},
+			{
+				"name": "Assignment_group",
+				"type": "UTF8"
+			},
+			{
+				"name": "Assigned_to",
+				"type": "UTF8"
+			},
+			{
+				"name": "Updated",
+				"type": "INT96"
+			},
+			{
+				"name": "Updated_by",
+				"type": "UTF8"
+			},
+			{
+				"name": "Closed_by",
+				"type": "UTF8"
+			},
+			{
+				"name": "Reassignment_count",
+				"type": "DOUBLE"
+			},
+			{
+				"name": "Parent_Incident",
+				"type": "UTF8"
+			},
+			{
+				"name": "Child_Incidents",
+				"type": "DOUBLE"
+			},
+			{
+				"name": "Resolve_time",
+				"type": "DOUBLE"
+			},
+			{
+				"name": "Resolved_by",
+				"type": "UTF8"
+			},
+			{
+				"name": "Reopen_count",
+				"type": "DOUBLE"
+			},
+			{
+				"name": "Tags",
+				"type": "UTF8"
+			},
+			{
+				"name": "Configuration_item",
+				"type": "UTF8"
+			},
+			{
+				"name": "Service",
+				"type": "UTF8"
+			},
+			{
+				"name": "Work_notes",
+				"type": "UTF8"
+			},
+			{
+				"name": "Comments_and_Work_notes",
+				"type": "UTF8"
+			},
+			{
+				"name": "Resolution_notes",
+				"type": "UTF8"
+			}
+		]
+	},
+	"type": "Microsoft.DataFactory/factories/datasets"
+}
