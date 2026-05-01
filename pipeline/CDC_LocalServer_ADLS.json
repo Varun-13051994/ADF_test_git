@@ -109,6 +109,12 @@
 				]
 			}
 		],
+		"parameters": {
+			"Dummy": {
+				"type": "string",
+				"defaultValue": "Dummy"
+			}
+		},
 		"annotations": [],
 		"lastPublishTime": "2026-04-21T11:16:46Z"
 	},
