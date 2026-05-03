@@ -1,0 +1,105 @@
+{
+	"$schema": "http://schema.management.azure.com/schemas/2015-01-01/deploymentTemplate.json#",
+	"contentVersion": "1.0.0.0",
+	"parameters": {
+		"factoryName": {
+			"type": "string",
+			"metadata": "Data Factory name",
+			"defaultValue": "VarunADF-testing"
+		},
+		"FileServer1_password": {
+			"type": "secureString",
+			"metadata": "Secure string for 'password' of 'FileServer1'"
+		},
+		"LS_VarunLocalServer_password": {
+			"type": "secureString",
+			"metadata": "Secure string for 'password' of 'LS_VarunLocalServer'"
+		},
+		"FileServer1_properties_typeProperties_host": {
+			"type": "string",
+			"defaultValue": "\\\\127.0.0.1\\ADF_testing\\ParquetFiles"
+		},
+		"FileServer1_properties_typeProperties_userId": {
+			"type": "string",
+			"defaultValue": "sumithras"
+		},
+		"LS_VarunLocalServer_properties_typeProperties_server": {
+			"type": "string",
+			"defaultValue": "127.0.0.1,1433"
+		},
+		"LS_VarunLocalServer_properties_typeProperties_database": {
+			"type": "string",
+			"defaultValue": "VARUN_TEST_DB"
+		},
+		"LS_VarunLocalServer_properties_typeProperties_userName": {
+			"type": "string",
+			"defaultValue": "Varun_test_"
+		},
+		"Test_Rest_properties_typeProperties_url": {
+			"type": "string",
+			"defaultValue": "https://jsonplaceholder.typicode.com"
+		},
+		"Varun_AzureDataLakeStorage_properties_typeProperties_url": {
+			"type": "string",
+			"defaultValue": "https://varunstorageaccountdb.dfs.core.windows.net/"
+		},
+		"containerUri": {
+			"type": "string",
+			"metadata": "URI to storage account containing linked ARM templates"
+		},
+		"containerSasToken": {
+			"type": "string",
+			"metadata": "Sas token to storage account containing linked ARM templates"
+		}
+	},
+	"variables": {
+		"factoryId": "[concat('Microsoft.DataFactory/factories/', parameters('factoryName'))]"
+	},
+	"resources": [
+		{
+			"name": "VarunADF-testing_ArmTemplate_0",
+			"type": "Microsoft.Resources/deployments",
+			"apiVersion": "2024-03-01",
+			"properties": {
+				"mode": "incremental",
+				"templateLink": {
+					"uri": "[concat(parameters('containerUri'), '/ArmTemplate_0.json', parameters('containerSasToken'))]",
+					"contentVersion": "1.0.0.0"
+				},
+				"parameters": {
+					"factoryName": {
+						"value": "[parameters('factoryName')]"
+					},
+					"FileServer1_password": {
+						"value": "[parameters('FileServer1_password')]"
+					},
+					"LS_VarunLocalServer_password": {
+						"value": "[parameters('LS_VarunLocalServer_password')]"
+					},
+					"Test_Rest_properties_typeProperties_url": {
+						"value": "[parameters('Test_Rest_properties_typeProperties_url')]"
+					},
+					"Varun_AzureDataLakeStorage_properties_typeProperties_url": {
+						"value": "[parameters('Varun_AzureDataLakeStorage_properties_typeProperties_url')]"
+					},
+					"FileServer1_properties_typeProperties_host": {
+						"value": "[parameters('FileServer1_properties_typeProperties_host')]"
+					},
+					"FileServer1_properties_typeProperties_userId": {
+						"value": "[parameters('FileServer1_properties_typeProperties_userId')]"
+					},
+					"LS_VarunLocalServer_properties_typeProperties_server": {
+						"value": "[parameters('LS_VarunLocalServer_properties_typeProperties_server')]"
+					},
+					"LS_VarunLocalServer_properties_typeProperties_database": {
+						"value": "[parameters('LS_VarunLocalServer_properties_typeProperties_database')]"
+					},
+					"LS_VarunLocalServer_properties_typeProperties_userName": {
+						"value": "[parameters('LS_VarunLocalServer_properties_typeProperties_userName')]"
+					}
+				}
+			},
+			"dependsOn": []
+		}
+	]
+}

@@ -1,0 +1,1097 @@
+{
+	"$schema": "http://schema.management.azure.com/schemas/2015-01-01/deploymentTemplate.json#",
+	"contentVersion": "1.0.0.0",
+	"parameters": {
+		"factoryName": {
+			"type": "string",
+			"metadata": "Data Factory name",
+			"defaultValue": "VarunADF-testing"
+		},
+		"FileServer1_password": {
+			"type": "secureString",
+			"metadata": "Secure string for 'password' of 'FileServer1'"
+		},
+		"LS_VarunLocalServer_password": {
+			"type": "secureString",
+			"metadata": "Secure string for 'password' of 'LS_VarunLocalServer'"
+		},
+		"FileServer1_properties_typeProperties_host": {
+			"type": "string",
+			"defaultValue": "\\\\127.0.0.1\\ADF_testing\\ParquetFiles"
+		},
+		"FileServer1_properties_typeProperties_userId": {
+			"type": "string",
+			"defaultValue": "sumithras"
+		},
+		"LS_VarunLocalServer_properties_typeProperties_server": {
+			"type": "string",
+			"defaultValue": "127.0.0.1,1433"
+		},
+		"LS_VarunLocalServer_properties_typeProperties_database": {
+			"type": "string",
+			"defaultValue": "VARUN_TEST_DB"
+		},
+		"LS_VarunLocalServer_properties_typeProperties_userName": {
+			"type": "string",
+			"defaultValue": "Varun_test_"
+		},
+		"Test_Rest_properties_typeProperties_url": {
+			"type": "string",
+			"defaultValue": "https://jsonplaceholder.typicode.com"
+		},
+		"Varun_AzureDataLakeStorage_properties_typeProperties_url": {
+			"type": "string",
+			"defaultValue": "https://varunstorageaccountdb.dfs.core.windows.net/"
+		}
+	},
+	"variables": {
+		"factoryId": "[concat('Microsoft.DataFactory/factories/', parameters('factoryName'))]"
+	},
+	"resources": [
+		{
+			"name": "[concat(parameters('factoryName'), '/CDC_LocalServer_ADLS')]",
+			"type": "Microsoft.DataFactory/factories/pipelines",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"activities": [
+					{
+						"name": "LocalServer_ADLS_CDC",
+						"type": "Copy",
+						"dependsOn": [],
+						"policy": {
+							"timeout": "0.00:30:00",
+							"retry": 0,
+							"retryIntervalInSeconds": 30,
+							"secureOutput": false,
+							"secureInput": false
+						},
+						"userProperties": [],
+						"typeProperties": {
+							"source": {
+								"type": "SqlServerSource",
+								"sqlReaderQuery": "SELECT * FROM med_data\nWHERE updated_time > DATEADD(MINUTE, -2, CURRENT_TIMESTAMP)\n",
+								"queryTimeout": "00:10:00",
+								"isolationLevel": "ReadCommitted",
+								"partitionOption": "None"
+							},
+							"sink": {
+								"type": "ParquetSink",
+								"storeSettings": {
+									"type": "AzureBlobFSWriteSettings",
+									"maxConcurrentConnections": 2,
+									"copyBehavior": "FlattenHierarchy"
+								},
+								"formatSettings": {
+									"type": "ParquetWriteSettings"
+								}
+							},
+							"enableStaging": false,
+							"parallelCopies": 2,
+							"enableSkipIncompatibleRow": true,
+							"translator": {
+								"type": "TabularTranslator",
+								"mappings": [
+									{
+										"source": {
+											"name": "claim_id",
+											"type": "Int32",
+											"physicalType": "int"
+										},
+										"sink": {
+											"name": "claim_id",
+											"type": "Int32",
+											"physicalType": "INT_32"
+										}
+									},
+									{
+										"source": {
+											"name": "encounter_id",
+											"type": "Int32",
+											"physicalType": "int"
+										},
+										"sink": {
+											"name": "encounter_id",
+											"type": "Int32",
+											"physicalType": "INT_32"
+										}
+									},
+									{
+										"source": {
+											"name": "claim_amount",
+											"type": "Double",
+											"physicalType": "float"
+										},
+										"sink": {
+											"name": "claim_amount",
+											"type": "Double",
+											"physicalType": "DOUBLE"
+										}
+									},
+									{
+										"source": {
+											"name": "updated_time",
+											"type": "DateTime",
+											"physicalType": "datetime"
+										},
+										"sink": {
+											"name": "updated_time",
+											"type": "DateTime",
+											"physicalType": "INT_96"
+										}
+									}
+								],
+								"typeConversion": true,
+								"typeConversionSettings": {
+									"allowDataTruncation": true,
+									"treatBooleanAsNumber": false
+								}
+							}
+						},
+						"inputs": [
+							{
+								"referenceName": "CDC_test",
+								"type": "DatasetReference",
+								"parameters": {}
+							}
+						],
+						"outputs": [
+							{
+								"referenceName": "CDC_ADLS",
+								"type": "DatasetReference",
+								"parameters": {}
+							}
+						]
+					}
+				],
+				"policy": {
+					"elapsedTimeMetric": {}
+				},
+				"parameters": {
+					"Dummy": {
+						"type": "string",
+						"defaultValue": "Dummy"
+					},
+					"Dummy_varun1": {
+						"type": "string",
+						"defaultValue": "Dummy_varun2"
+					}
+				},
+				"annotations": [],
+				"lastPublishTime": "2026-04-21T11:16:46Z"
+			},
+			"dependsOn": [
+				"[concat(variables('factoryId'), '/datasets/CDC_test')]",
+				"[concat(variables('factoryId'), '/datasets/CDC_ADLS')]"
+			]
+		},
+		{
+			"name": "[concat(parameters('factoryName'), '/PipelineLocalToADLS')]",
+			"type": "Microsoft.DataFactory/factories/pipelines",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"activities": [
+					{
+						"name": "Get Metadata1",
+						"type": "GetMetadata",
+						"dependsOn": [],
+						"policy": {
+							"timeout": "0.12:00:00",
+							"retry": 0,
+							"retryIntervalInSeconds": 30,
+							"secureOutput": false,
+							"secureInput": false
+						},
+						"userProperties": [],
+						"typeProperties": {
+							"dataset": {
+								"referenceName": "LocalParquetFiles",
+								"type": "DatasetReference",
+								"parameters": {}
+							},
+							"fieldList": [
+								"childItems"
+							],
+							"storeSettings": {
+								"type": "FileServerReadSettings",
+								"recursive": true,
+								"enablePartitionDiscovery": false
+							},
+							"formatSettings": {
+								"type": "ParquetReadSettings"
+							}
+						}
+					},
+					{
+						"name": "ForEach1",
+						"type": "ForEach",
+						"dependsOn": [
+							{
+								"activity": "Get Metadata1",
+								"dependencyConditions": [
+									"Completed"
+								]
+							}
+						],
+						"userProperties": [],
+						"typeProperties": {
+							"items": {
+								"value": "@activity('Get Metadata1').output.childItems",
+								"type": "Expression"
+							},
+							"isSequential": true,
+							"activities": [
+								{
+									"name": "CheckForFileName",
+									"type": "IfCondition",
+									"dependsOn": [],
+									"userProperties": [],
+									"typeProperties": {
+										"expression": {
+											"value": "@startswith(item().name,'Parquet')",
+											"type": "Expression"
+										},
+										"ifTrueActivities": [
+											{
+												"name": "CopyToADLS",
+												"type": "Copy",
+												"dependsOn": [],
+												"policy": {
+													"timeout": "0.00:30:00",
+													"retry": 0,
+													"retryIntervalInSeconds": 30,
+													"secureOutput": false,
+													"secureInput": false
+												},
+												"userProperties": [],
+												"typeProperties": {
+													"source": {
+														"type": "ParquetSource",
+														"storeSettings": {
+															"type": "FileServerReadSettings",
+															"recursive": false,
+															"wildcardFolderPath": "\\\\127.0.0.1\\ADF_testing\\ParquetFiles",
+															"wildcardFileName": {
+																"value": "@item().name",
+																"type": "Expression"
+															},
+															"enablePartitionDiscovery": false
+														},
+														"formatSettings": {
+															"type": "ParquetReadSettings"
+														}
+													},
+													"sink": {
+														"type": "ParquetSink",
+														"storeSettings": {
+															"type": "AzureBlobFSWriteSettings",
+															"maxConcurrentConnections": 2,
+															"copyBehavior": "FlattenHierarchy"
+														},
+														"formatSettings": {
+															"type": "ParquetWriteSettings"
+														}
+													},
+													"enableStaging": false,
+													"translator": {
+														"type": "TabularTranslator",
+														"mappings": [
+															{
+																"source": {
+																	"name": "user_id",
+																	"type": "INT64"
+																},
+																"sink": {
+																	"name": "user_id",
+																	"type": "INT64"
+																}
+															},
+															{
+																"source": {
+																	"name": "product",
+																	"type": "UTF8"
+																},
+																"sink": {
+																	"name": "product",
+																	"type": "UTF8"
+																}
+															},
+															{
+																"source": {
+																	"name": "amount",
+																	"type": "INT64"
+																},
+																"sink": {
+																	"name": "amount",
+																	"type": "INT64"
+																}
+															}
+														],
+														"typeConversion": true,
+														"typeConversionSettings": {
+															"allowDataTruncation": false,
+															"treatBooleanAsNumber": false
+														}
+													}
+												},
+												"inputs": [
+													{
+														"referenceName": "LocalParquetFiles",
+														"type": "DatasetReference",
+														"parameters": {}
+													}
+												],
+												"outputs": [
+													{
+														"referenceName": "LocalToADLS",
+														"type": "DatasetReference",
+														"parameters": {}
+													}
+												]
+											}
+										]
+									}
+								}
+							]
+						}
+					}
+				],
+				"policy": {
+					"elapsedTimeMetric": {}
+				},
+				"annotations": [],
+				"lastPublishTime": "2026-04-18T11:59:59Z"
+			},
+			"dependsOn": [
+				"[concat(variables('factoryId'), '/datasets/LocalParquetFiles')]",
+				"[concat(variables('factoryId'), '/datasets/LocalToADLS')]"
+			]
+		},
+		{
+			"name": "[concat(parameters('factoryName'), '/Varun_SQLServer_ADLS')]",
+			"type": "Microsoft.DataFactory/factories/pipelines",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"activities": [
+					{
+						"name": "CollectTables_and_Iterate",
+						"type": "ForEach",
+						"dependsOn": [
+							{
+								"activity": "DB_tables",
+								"dependencyConditions": [
+									"Succeeded"
+								]
+							}
+						],
+						"userProperties": [],
+						"typeProperties": {
+							"items": {
+								"value": "@split(variables('Tables'), ', ')",
+								"type": "Expression"
+							},
+							"batchCount": 4,
+							"activities": [
+								{
+									"name": "Copy data1",
+									"type": "Copy",
+									"dependsOn": [],
+									"policy": {
+										"timeout": "0.12:00:00",
+										"retry": 0,
+										"retryIntervalInSeconds": 30,
+										"secureOutput": false,
+										"secureInput": false
+									},
+									"userProperties": [],
+									"typeProperties": {
+										"source": {
+											"type": "SqlServerSource",
+											"queryTimeout": "02:00:00",
+											"partitionOption": "None"
+										},
+										"sink": {
+											"type": "ParquetSink",
+											"storeSettings": {
+												"type": "AzureBlobFSWriteSettings",
+												"maxConcurrentConnections": 4,
+												"copyBehavior": "FlattenHierarchy"
+											},
+											"formatSettings": {
+												"type": "ParquetWriteSettings"
+											}
+										},
+										"enableStaging": false,
+										"translator": {
+											"type": "TabularTranslator",
+											"typeConversion": true,
+											"typeConversionSettings": {
+												"allowDataTruncation": true,
+												"treatBooleanAsNumber": false
+											}
+										}
+									},
+									"inputs": [
+										{
+											"referenceName": "SqlServerTable_Incident",
+											"type": "DatasetReference",
+											"parameters": {
+												"Table_name_src": {
+													"value": "@item()",
+													"type": "Expression"
+												}
+											}
+										}
+									],
+									"outputs": [
+										{
+											"referenceName": "Incidents_Parquet",
+											"type": "DatasetReference",
+											"parameters": {
+												"FileName": {
+													"value": "@concat(item(), '.parquet')",
+													"type": "Expression"
+												}
+											}
+										}
+									]
+								},
+								{
+									"name": "upon_failure",
+									"type": "Fail",
+									"dependsOn": [
+										{
+											"activity": "Copy data1",
+											"dependencyConditions": [
+												"Failed"
+											]
+										}
+									],
+									"userProperties": [],
+									"typeProperties": {
+										"message": {
+											"value": "@activity('Copy data1').error.message",
+											"type": "Expression"
+										},
+										"errorCode": "500"
+									}
+								}
+							]
+						}
+					},
+					{
+						"name": "DB_tables",
+						"type": "SetVariable",
+						"dependsOn": [],
+						"policy": {
+							"secureOutput": false,
+							"secureInput": false
+						},
+						"userProperties": [],
+						"typeProperties": {
+							"variableName": "Tables",
+							"value": {
+								"value": "@concat(pipeline().parameters.Tb1, ', ',\n        pipeline().parameters.Tb2, ', ',\n        pipeline().parameters.Tb3\n        )",
+								"type": "Expression"
+							}
+						}
+					}
+				],
+				"concurrency": 4,
+				"policy": {
+					"elapsedTimeMetric": {}
+				},
+				"parameters": {
+					"Tb1": {
+						"type": "String",
+						"defaultValue": "Incident"
+					},
+					"Tb2": {
+						"type": "String",
+						"defaultValue": "Contingency & Overhead cost"
+					},
+					"Tb3": {
+						"type": "String",
+						"defaultValue": "salary_details"
+					}
+				},
+				"variables": {
+					"Tables": {
+						"type": "String"
+					}
+				},
+				"annotations": [],
+				"lastPublishTime": "2026-04-27T09:31:12Z"
+			},
+			"dependsOn": [
+				"[concat(variables('factoryId'), '/datasets/SqlServerTable_Incident')]",
+				"[concat(variables('factoryId'), '/datasets/Incidents_Parquet')]"
+			]
+		},
+		{
+			"name": "[concat(parameters('factoryName'), '/CDC_ADLS')]",
+			"type": "Microsoft.DataFactory/factories/datasets",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"linkedServiceName": {
+					"referenceName": "Varun_AzureDataLakeStorage",
+					"type": "LinkedServiceReference"
+				},
+				"annotations": [],
+				"type": "Parquet",
+				"typeProperties": {
+					"location": {
+						"type": "AzureBlobFSLocation",
+						"fileName": {
+							"value": "@concat(\r\n  'Parquet_CDC_',\r\n  formatDateTime(\r\n    convertFromUtc(utcNow(), 'India Standard Time'),\r\n    'yyyy_MMM_dd HH_mm_ss'\r\n  )\r\n)",
+							"type": "Expression"
+						},
+						"folderPath": "landing/CDC_SQL_Server",
+						"fileSystem": "dev-varun-azurecontainer"
+					},
+					"compressionCodec": "snappy"
+				},
+				"schema": []
+			},
+			"dependsOn": [
+				"[concat(variables('factoryId'), '/linkedServices/Varun_AzureDataLakeStorage')]"
+			]
+		},
+		{
+			"name": "[concat(parameters('factoryName'), '/CDC_test')]",
+			"type": "Microsoft.DataFactory/factories/datasets",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"linkedServiceName": {
+					"referenceName": "LS_VarunLocalServer",
+					"type": "LinkedServiceReference"
+				},
+				"annotations": [],
+				"type": "SqlServerTable",
+				"schema": [
+					{
+						"name": "claim_id",
+						"type": "int",
+						"precision": 10
+					},
+					{
+						"name": "encounter_id",
+						"type": "int",
+						"precision": 10
+					},
+					{
+						"name": "claim_amount",
+						"type": "float",
+						"precision": 15
+					},
+					{
+						"name": "updated_time",
+						"type": "datetime",
+						"precision": 23,
+						"scale": 3
+					}
+				],
+				"typeProperties": {
+					"schema": "dbo",
+					"table": "med_data"
+				}
+			},
+			"dependsOn": [
+				"[concat(variables('factoryId'), '/linkedServices/LS_VarunLocalServer')]"
+			]
+		},
+		{
+			"name": "[concat(parameters('factoryName'), '/Incidents_Parquet')]",
+			"type": "Microsoft.DataFactory/factories/datasets",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"linkedServiceName": {
+					"referenceName": "Varun_AzureDataLakeStorage",
+					"type": "LinkedServiceReference"
+				},
+				"parameters": {
+					"FileName": {
+						"type": "string"
+					}
+				},
+				"annotations": [],
+				"type": "Parquet",
+				"typeProperties": {
+					"location": {
+						"type": "AzureBlobFSLocation",
+						"fileName": {
+							"value": "@dataset().FileName",
+							"type": "Expression"
+						},
+						"folderPath": "landing",
+						"fileSystem": "dev-varun-azurecontainer"
+					},
+					"compressionCodec": "snappy"
+				},
+				"schema": [
+					{
+						"name": "Number",
+						"type": "UTF8"
+					},
+					{
+						"name": "Opened",
+						"type": "DATE"
+					},
+					{
+						"name": "Resolved",
+						"type": "DATE"
+					},
+					{
+						"name": "Short_description",
+						"type": "UTF8"
+					},
+					{
+						"name": "Caller",
+						"type": "UTF8"
+					},
+					{
+						"name": "Priority",
+						"type": "UTF8"
+					},
+					{
+						"name": "State",
+						"type": "UTF8"
+					},
+					{
+						"name": "Category",
+						"type": "UTF8"
+					},
+					{
+						"name": "Assignment_group",
+						"type": "UTF8"
+					},
+					{
+						"name": "Assigned_to",
+						"type": "UTF8"
+					},
+					{
+						"name": "Updated",
+						"type": "INT96"
+					},
+					{
+						"name": "Updated_by",
+						"type": "UTF8"
+					},
+					{
+						"name": "Closed_by",
+						"type": "UTF8"
+					},
+					{
+						"name": "Reassignment_count",
+						"type": "DOUBLE"
+					},
+					{
+						"name": "Parent_Incident",
+						"type": "UTF8"
+					},
+					{
+						"name": "Child_Incidents",
+						"type": "DOUBLE"
+					},
+					{
+						"name": "Resolve_time",
+						"type": "DOUBLE"
+					},
+					{
+						"name": "Resolved_by",
+						"type": "UTF8"
+					},
+					{
+						"name": "Reopen_count",
+						"type": "DOUBLE"
+					},
+					{
+						"name": "Tags",
+						"type": "UTF8"
+					},
+					{
+						"name": "Configuration_item",
+						"type": "UTF8"
+					},
+					{
+						"name": "Service",
+						"type": "UTF8"
+					},
+					{
+						"name": "Work_notes",
+						"type": "UTF8"
+					},
+					{
+						"name": "Comments_and_Work_notes",
+						"type": "UTF8"
+					},
+					{
+						"name": "Resolution_notes",
+						"type": "UTF8"
+					}
+				]
+			},
+			"dependsOn": [
+				"[concat(variables('factoryId'), '/linkedServices/Varun_AzureDataLakeStorage')]"
+			]
+		},
+		{
+			"name": "[concat(parameters('factoryName'), '/LocalParquetFiles')]",
+			"type": "Microsoft.DataFactory/factories/datasets",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"linkedServiceName": {
+					"referenceName": "FileServer1",
+					"type": "LinkedServiceReference"
+				},
+				"annotations": [],
+				"type": "Parquet",
+				"typeProperties": {
+					"location": {
+						"type": "FileServerLocation"
+					},
+					"compressionCodec": "snappy"
+				},
+				"schema": [
+					{
+						"name": "user_id",
+						"type": "INT64"
+					},
+					{
+						"name": "product",
+						"type": "UTF8"
+					},
+					{
+						"name": "amount",
+						"type": "INT64"
+					}
+				]
+			},
+			"dependsOn": [
+				"[concat(variables('factoryId'), '/linkedServices/FileServer1')]"
+			]
+		},
+		{
+			"name": "[concat(parameters('factoryName'), '/LocalToADLS')]",
+			"type": "Microsoft.DataFactory/factories/datasets",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"linkedServiceName": {
+					"referenceName": "Varun_AzureDataLakeStorage",
+					"type": "LinkedServiceReference"
+				},
+				"annotations": [],
+				"type": "Parquet",
+				"typeProperties": {
+					"location": {
+						"type": "AzureBlobFSLocation",
+						"fileName": {
+							"value": "@concat('Parquet_', formatDateTime(utcNow(), 'yyyy_MMM_dd HHmmss'), '.parquet')",
+							"type": "Expression"
+						},
+						"folderPath": "landing",
+						"fileSystem": "dev-varun-azurecontainer"
+					},
+					"compressionCodec": "snappy"
+				},
+				"schema": [
+					{
+						"name": "user_id",
+						"type": "INT64"
+					},
+					{
+						"name": "product",
+						"type": "UTF8"
+					},
+					{
+						"name": "amount",
+						"type": "INT64"
+					}
+				]
+			},
+			"dependsOn": [
+				"[concat(variables('factoryId'), '/linkedServices/Varun_AzureDataLakeStorage')]"
+			]
+		},
+		{
+			"name": "[concat(parameters('factoryName'), '/Rest_Dataset')]",
+			"type": "Microsoft.DataFactory/factories/datasets",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"linkedServiceName": {
+					"referenceName": "Test_Rest",
+					"type": "LinkedServiceReference"
+				},
+				"annotations": [],
+				"type": "RestResource",
+				"typeProperties": {
+					"relativeUrl": "/posts"
+				},
+				"schema": []
+			},
+			"dependsOn": [
+				"[concat(variables('factoryId'), '/linkedServices/Test_Rest')]"
+			]
+		},
+		{
+			"name": "[concat(parameters('factoryName'), '/SqlServerTable_Incident')]",
+			"type": "Microsoft.DataFactory/factories/datasets",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"linkedServiceName": {
+					"referenceName": "LS_VarunLocalServer",
+					"type": "LinkedServiceReference"
+				},
+				"parameters": {
+					"Table_name_src": {
+						"type": "string"
+					}
+				},
+				"annotations": [],
+				"type": "SqlServerTable",
+				"schema": [
+					{
+						"name": "Number",
+						"type": "nvarchar"
+					},
+					{
+						"name": "Opened",
+						"type": "date"
+					},
+					{
+						"name": "Resolved",
+						"type": "date"
+					},
+					{
+						"name": "Short description",
+						"type": "nvarchar"
+					},
+					{
+						"name": "Caller",
+						"type": "nvarchar"
+					},
+					{
+						"name": "Priority",
+						"type": "nvarchar"
+					},
+					{
+						"name": "State",
+						"type": "nvarchar"
+					},
+					{
+						"name": "Category",
+						"type": "nvarchar"
+					},
+					{
+						"name": "Assignment group",
+						"type": "nvarchar"
+					},
+					{
+						"name": "Assigned to",
+						"type": "nvarchar"
+					},
+					{
+						"name": "Updated",
+						"type": "datetime",
+						"precision": 23,
+						"scale": 3
+					},
+					{
+						"name": "Updated by",
+						"type": "nvarchar"
+					},
+					{
+						"name": "Closed by",
+						"type": "nvarchar"
+					},
+					{
+						"name": "Reassignment count",
+						"type": "float",
+						"precision": 15
+					},
+					{
+						"name": "Parent Incident",
+						"type": "nvarchar"
+					},
+					{
+						"name": "Child Incidents",
+						"type": "float",
+						"precision": 15
+					},
+					{
+						"name": "Resolve time",
+						"type": "float",
+						"precision": 15
+					},
+					{
+						"name": "Resolved by",
+						"type": "nvarchar"
+					},
+					{
+						"name": "Reopen count",
+						"type": "float",
+						"precision": 15
+					},
+					{
+						"name": "Tags",
+						"type": "nvarchar"
+					},
+					{
+						"name": "Configuration item",
+						"type": "nvarchar"
+					},
+					{
+						"name": "Service",
+						"type": "nvarchar"
+					},
+					{
+						"name": "Work notes",
+						"type": "nvarchar"
+					},
+					{
+						"name": "Comments and Work notes",
+						"type": "nvarchar"
+					},
+					{
+						"name": "Resolution notes",
+						"type": "nvarchar"
+					}
+				],
+				"typeProperties": {
+					"schema": "dbo",
+					"table": {
+						"value": "@dataset().Table_name_src",
+						"type": "Expression"
+					}
+				}
+			},
+			"dependsOn": [
+				"[concat(variables('factoryId'), '/linkedServices/LS_VarunLocalServer')]"
+			]
+		},
+		{
+			"name": "[concat(parameters('factoryName'), '/FileServer1')]",
+			"type": "Microsoft.DataFactory/factories/linkedServices",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"annotations": [],
+				"type": "FileServer",
+				"typeProperties": {
+					"host": "[parameters('FileServer1_properties_typeProperties_host')]",
+					"userId": "[parameters('FileServer1_properties_typeProperties_userId')]",
+					"password": {
+						"type": "SecureString",
+						"value": "[parameters('FileServer1_password')]"
+					}
+				},
+				"connectVia": {
+					"referenceName": "VarunLocalSQLServer",
+					"type": "IntegrationRuntimeReference"
+				}
+			},
+			"dependsOn": [
+				"[concat(variables('factoryId'), '/integrationRuntimes/VarunLocalSQLServer')]"
+			]
+		},
+		{
+			"name": "[concat(parameters('factoryName'), '/LS_VarunLocalServer')]",
+			"type": "Microsoft.DataFactory/factories/linkedServices",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"annotations": [],
+				"type": "SqlServer",
+				"typeProperties": {
+					"server": "[parameters('LS_VarunLocalServer_properties_typeProperties_server')]",
+					"database": "[parameters('LS_VarunLocalServer_properties_typeProperties_database')]",
+					"encrypt": "mandatory",
+					"trustServerCertificate": true,
+					"authenticationType": "SQL",
+					"userName": "[parameters('LS_VarunLocalServer_properties_typeProperties_userName')]",
+					"password": {
+						"type": "SecureString",
+						"value": "[parameters('LS_VarunLocalServer_password')]"
+					},
+					"alwaysEncryptedSettings": {
+						"alwaysEncryptedAkvAuthType": "ManagedIdentity"
+					}
+				},
+				"connectVia": {
+					"referenceName": "VarunLocalSQLServer",
+					"type": "IntegrationRuntimeReference"
+				}
+			},
+			"dependsOn": [
+				"[concat(variables('factoryId'), '/integrationRuntimes/VarunLocalSQLServer')]"
+			]
+		},
+		{
+			"name": "[concat(parameters('factoryName'), '/Test_Rest')]",
+			"type": "Microsoft.DataFactory/factories/linkedServices",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"annotations": [],
+				"type": "RestService",
+				"typeProperties": {
+					"url": "[parameters('Test_Rest_properties_typeProperties_url')]",
+					"enableServerCertificateValidation": true,
+					"authenticationType": "Anonymous"
+				}
+			},
+			"dependsOn": []
+		},
+		{
+			"name": "[concat(parameters('factoryName'), '/Varun_AzureDataLakeStorage')]",
+			"type": "Microsoft.DataFactory/factories/linkedServices",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"annotations": [],
+				"type": "AzureBlobFS",
+				"typeProperties": {
+					"url": "[parameters('Varun_AzureDataLakeStorage_properties_typeProperties_url')]"
+				}
+			},
+			"dependsOn": []
+		},
+		{
+			"name": "[concat(parameters('factoryName'), '/LocalSQL-ADLSTrigger')]",
+			"type": "Microsoft.DataFactory/factories/triggers",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"annotations": [],
+				"runtimeState": "Stopped",
+				"pipelines": [
+					{
+						"pipelineReference": {
+							"referenceName": "Varun_SQLServer_ADLS",
+							"type": "PipelineReference"
+						},
+						"parameters": {}
+					}
+				],
+				"type": "ScheduleTrigger",
+				"typeProperties": {
+					"recurrence": {
+						"frequency": "Minute",
+						"interval": 3,
+						"startTime": "2026-04-15T11:34:00",
+						"endTime": "2026-04-17T11:34:00",
+						"timeZone": "India Standard Time"
+					}
+				}
+			},
+			"dependsOn": [
+				"[concat(variables('factoryId'), '/pipelines/Varun_SQLServer_ADLS')]"
+			]
+		},
+		{
+			"name": "[concat(parameters('factoryName'), '/VarunLocalSQLServer')]",
+			"type": "Microsoft.DataFactory/factories/integrationRuntimes",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"type": "SelfHosted",
+				"description": "This is an IR to connect to my local server",
+				"typeProperties": {}
+			},
+			"dependsOn": []
+		}
+	]
+}

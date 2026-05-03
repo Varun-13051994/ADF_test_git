@@ -1,0 +1,42 @@
+{
+	"$schema": "https://schema.management.azure.com/schemas/2015-01-01/deploymentParameters.json#",
+	"contentVersion": "1.0.0.0",
+	"parameters": {
+		"factoryName": {
+			"value": "VarunADF-testing"
+		},
+		"FileServer1_password": {
+			"value": ""
+		},
+		"LS_VarunLocalServer_password": {
+			"value": ""
+		},
+		"FileServer1_properties_typeProperties_host": {
+			"value": "\\\\127.0.0.1\\ADF_testing\\ParquetFiles"
+		},
+		"FileServer1_properties_typeProperties_userId": {
+			"value": "sumithras"
+		},
+		"LS_VarunLocalServer_properties_typeProperties_server": {
+			"value": "127.0.0.1,1433"
+		},
+		"LS_VarunLocalServer_properties_typeProperties_database": {
+			"value": "VARUN_TEST_DB"
+		},
+		"LS_VarunLocalServer_properties_typeProperties_userName": {
+			"value": "Varun_test_"
+		},
+		"Test_Rest_properties_typeProperties_url": {
+			"value": "https://jsonplaceholder.typicode.com"
+		},
+		"Varun_AzureDataLakeStorage_properties_typeProperties_url": {
+			"value": "https://varunstorageaccountdb.dfs.core.windows.net/"
+		},
+		"containerUri": {
+			"value": ""
+		},
+		"containerSasToken": {
+			"value": ""
+		}
+	}
+}
